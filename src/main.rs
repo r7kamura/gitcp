@@ -7,9 +7,10 @@ use structopt::StructOpt;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let opt = Opt::from_args();
 
-    let bytes = download_tar_gz(&opt.source).await?;
+    let url = generate_download_url(&opt.source);
+    let bytes = download(&url).await?;
     let tempdir = tempfile::Builder::new().tempdir()?;
-    unpack_tar_gz(&bytes, tempdir.path())?;
+    unpack(bytes.as_ref(), tempdir.path())?;
 
     let path_buf = tempdir.path().join("*/*");
     let source_glob_pattern = path_buf.to_str().unwrap();
@@ -18,18 +19,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn generate_tar_gz_url(source: &str) -> String {
+fn generate_download_url(source: &str) -> String {
     format!("https://api.github.com/repos/{}/tarball/", source)
 }
 
 async fn download(url: &str) -> Result<bytes::Bytes, reqwest::Error> {
     let client = reqwest::ClientBuilder::new().user_agent("gitcp").build()?;
     client.get(url).send().await?.bytes().await
-}
-
-async fn download_tar_gz(source: &str) -> Result<bytes::Bytes, reqwest::Error> {
-    let url = generate_tar_gz_url(source);
-    download(&url).await
 }
 
 fn move_files(source_glob_pattern: &str, destination: &str) -> Result<u64, fs_extra::error::Error> {
@@ -43,11 +39,11 @@ fn move_files(source_glob_pattern: &str, destination: &str) -> Result<u64, fs_ex
     fs_extra::move_items(&path_bufs, destination, &copy_options)
 }
 
-fn unpack_tar_gz(
-    bytes: &bytes::Bytes,
+fn unpack(
+    readable: impl std::io::Read,
     destination: &std::path::Path,
 ) -> Result<(), std::io::Error> {
-    let gz_encoder = flate2::read::GzDecoder::new(bytes.as_ref());
+    let gz_encoder = flate2::read::GzDecoder::new(readable);
     let mut archive = tar::Archive::new(gz_encoder);
     archive.unpack(destination)
 }
