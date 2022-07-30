@@ -10,24 +10,40 @@ impl Source {
     pub fn download_url(&self) -> Option<String> {
         if self.reference().is_none() {
             Some(format!(
-                "https://api.github.com/repos/{repository}/tarball/",
-                repository = self.repository()?
+                "https://api.github.com/repos/{repository_identifier}/tarball/",
+                repository_identifier = self.repository_identifier()?
             ))
         } else {
             Some(format!(
-                "https://codeload.github.com/{repository}/legacy.tar.gz/refs/heads/{reference}",
-                repository = self.repository()?,
+                "https://codeload.github.com/{repository_identifier}/legacy.tar.gz/refs/heads/{reference}",
+                repository_identifier = self.repository_identifier()?,
                 reference = self.reference()?
             ))
         }
     }
 
-    fn reference(&self) -> Option<&str> {
-        self.raw.split_once('@').map(|x| x.1)
+    pub fn glob_pattern(&self) -> String {
+        format!("*/{}", self.file_path().unwrap_or_else(|| "*".to_string()))
     }
 
-    fn repository(&self) -> Option<&str> {
-        self.raw.split('@').next()
+    fn reference(&self) -> Option<String> {
+        self.raw.split_once('@').map(|x| x.1.to_string())
+    }
+
+    fn repository_identifier(&self) -> Option<String> {
+        let mut segments = self.raw.split('@').next()?.splitn(3, '/');
+        let owner = segments.next()?;
+        let name = segments.next()?;
+        Some(format!("{owner}/{name}", owner = owner, name = name))
+    }
+
+    fn file_path(&self) -> Option<String> {
+        self.raw
+            .split('@')
+            .next()?
+            .splitn(3, '/')
+            .nth(2)
+            .map(|x| x.to_string())
     }
 }
 
@@ -52,5 +68,19 @@ mod tests {
             "https://codeload.github.com/rust-lang/rust/legacy.tar.gz/refs/heads/master",
             url
         );
+    }
+
+    #[test]
+    fn test_glob_pattern_on_none_case() {
+        let source = "rust-lang/rust";
+        let glob_pattern = super::Source::new(source.to_string()).glob_pattern();
+        assert_eq!("*/*", glob_pattern);
+    }
+
+    #[test]
+    fn test_glob_pattern_on_some_case() {
+        let source = "rust-lang/rust/foo/bar";
+        let glob_pattern = super::Source::new(source.to_string()).glob_pattern();
+        assert_eq!("*/foo/bar", glob_pattern);
     }
 }
