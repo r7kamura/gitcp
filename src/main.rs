@@ -24,16 +24,16 @@ async fn download(url: &str) -> Result<bytes::Bytes, reqwest::Error> {
 }
 
 fn move_items(source_glob_pattern: &str, destination: &str) -> Result<u64, fs_extra::error::Error> {
-    let paths: Vec<std::path::PathBuf> = list_moved_item_paths(source_glob_pattern);
+    let paths = list_moved_item_paths(source_glob_pattern);
     let mut copy_options = fs_extra::dir::CopyOptions::new();
     copy_options.overwrite = true;
     fs_extra::move_items(&paths, destination, &copy_options)
 }
 
 fn list_moved_item_paths(glob_pattern: &str) -> Vec<std::path::PathBuf> {
-    glob::glob(glob_pattern)
+    globwalk::glob(glob_pattern)
         .unwrap()
-        .map(|path| path.unwrap())
+        .map(|path| path.unwrap().path().to_owned())
         .collect()
 }
 
