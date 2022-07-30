@@ -58,8 +58,6 @@ CHANGELOG.md
 README.md
 ```
 
-For example, if we have `.gitcpignore` in the target repository, `CHANGELOG.md` and `README.md` will not be copied. This is mainly a concern for those who provide repositories that are copied by `gitcp`.
-
 ## Background
 
 A s a tool creator, this can be useful when you want to provide users with some initial template files.
