@@ -11,7 +11,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let tempdir = tempfile::Builder::new().tempdir()?;
     unpack(bytes.as_ref(), tempdir.path())?;
 
-    let path_buf = tempdir.path().join("*/*");
+    let path_buf = tempdir.path().join(source.glob_pattern());
     let source_glob_pattern = path_buf.to_str().unwrap();
     move_items(source_glob_pattern, &opt.destination)?;
 
