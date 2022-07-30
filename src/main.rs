@@ -47,7 +47,6 @@ fn unpack_tar_gz(
     bytes: &bytes::Bytes,
     destination: &std::path::Path,
 ) -> Result<(), std::io::Error> {
-    println!("{:?}", bytes);
     let gz_encoder = flate2::read::GzDecoder::new(bytes.as_ref());
     let mut archive = tar::Archive::new(gz_encoder);
     archive.unpack(destination)
