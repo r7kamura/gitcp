@@ -4,6 +4,23 @@ Copy files from Git repository to local.
 
 ## Usage
 
+```
+$ gitcp --help
+gitcp 0.1.0
+Copy files from Git repository to local.
+
+USAGE:
+    gitcp <source> [destination]
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+ARGS:
+    <source>         GitHub repository name (e.g. r7kamura/gitcp)
+    <destination>    Path to destination directory [default: .]
+```
+
 ### Copy all files
 
 Copy all files from https://github.com/owner/repo to current directory.
