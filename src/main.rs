@@ -12,7 +12,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let path_buf = tempdir.path().join("*/*");
     let source_glob_pattern = path_buf.to_str().unwrap();
-    move_files(source_glob_pattern, &opt.destination)?;
+    move_items(source_glob_pattern, &opt.destination)?;
 
     Ok(())
 }
@@ -26,15 +26,15 @@ async fn download(url: &str) -> Result<bytes::Bytes, reqwest::Error> {
     client.get(url).send().await?.bytes().await
 }
 
-fn move_files(source_glob_pattern: &str, destination: &str) -> Result<u64, fs_extra::error::Error> {
-    let mut path_bufs = Vec::new();
-    glob::glob(source_glob_pattern).unwrap().for_each(|path| {
-        let path = path.unwrap();
-        path_bufs.push(path);
-    });
+fn move_items(source_glob_pattern: &str, destination: &str) -> Result<u64, fs_extra::error::Error> {
+    let paths: Vec<std::path::PathBuf> = list_moved_item_paths(source_glob_pattern);
     let mut copy_options = fs_extra::dir::CopyOptions::new();
     copy_options.overwrite = true;
-    fs_extra::move_items(&path_bufs, destination, &copy_options)
+    fs_extra::move_items(&paths, destination, &copy_options)
+}
+
+fn list_moved_item_paths(glob_pattern: &str) -> Vec<std::path::PathBuf> {
+    glob::glob(glob_pattern).unwrap().map(|path| path.unwrap()).collect()
 }
 
 fn unpack(
