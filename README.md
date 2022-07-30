@@ -41,10 +41,10 @@ gitcp owner/repo tmp/repo
 gitcp owner/repo@v1
 ```
 
-### Copy specific file with specific name
+### Copy specific file
 
 ```
-gitcp owner/repo/foo.txt bar.txt
+gitcp owner/repo/foo.txt
 ```
 
 ## Configuration
