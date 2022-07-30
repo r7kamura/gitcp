@@ -23,11 +23,11 @@ impl Source {
     }
 
     fn reference(&self) -> Option<&str> {
-        self.raw.split('@').nth(1)
+        self.raw.splitn(2, '@').nth(1)
     }
 
     fn repository(&self) -> Option<&str> {
-        self.raw.split('@').next()
+        self.raw.splitn(2, '@').next()
     }
 }
 
