@@ -50,7 +50,7 @@ gitcp owner/repo/foo.txt bar.txt
 
 ### .gitcpignore
 
-If there is `.gitcpignore` in the target repository, it will be used to ignore files.
+If there is `.gitcpignore` in the copied repository side, it will be used to ignore files.
 
 ```
 # .gitcpignore
