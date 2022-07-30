@@ -5,7 +5,8 @@ use structopt::StructOpt;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let opt = gitcp::opt::Opt::from_args();
 
-    let url = generate_download_url(&opt.source);
+    let source = gitcp::source::Source::new(opt.source);
+    let url = source.download_url().unwrap();
     let bytes = download(&url).await?;
     let tempdir = tempfile::Builder::new().tempdir()?;
     unpack(bytes.as_ref(), tempdir.path())?;
@@ -15,10 +16,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     move_items(source_glob_pattern, &opt.destination)?;
 
     Ok(())
-}
-
-fn generate_download_url(source: &str) -> String {
-    gitcp::source::Source::new(source.to_string()).download_url()
 }
 
 async fn download(url: &str) -> Result<bytes::Bytes, reqwest::Error> {
@@ -34,7 +31,10 @@ fn move_items(source_glob_pattern: &str, destination: &str) -> Result<u64, fs_ex
 }
 
 fn list_moved_item_paths(glob_pattern: &str) -> Vec<std::path::PathBuf> {
-    glob::glob(glob_pattern).unwrap().map(|path| path.unwrap()).collect()
+    glob::glob(glob_pattern)
+        .unwrap()
+        .map(|path| path.unwrap())
+        .collect()
 }
 
 fn unpack(
