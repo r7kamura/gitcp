@@ -1,11 +1,9 @@
-use gitcp::opt::Opt;
-
-// For `from_args`.
+// For `Opt::from_args`.
 use structopt::StructOpt;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let opt = Opt::from_args();
+    let opt = gitcp::opt::Opt::from_args();
 
     let url = generate_download_url(&opt.source);
     let bytes = download(&url).await?;
