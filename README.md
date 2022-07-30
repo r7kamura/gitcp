@@ -32,8 +32,9 @@ gitcp owner/repo
 ### Copy all files into specific directory
 
 ```
-gitcp owner/repo dist
+gitcp owner/repo tmp/repo
 ```
+
 ### Copy all files from specific ref
 
 ```
