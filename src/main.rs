@@ -20,7 +20,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn generate_download_url(source: &str) -> String {
-    format!("https://api.github.com/repos/{}/tarball/", source)
+    gitcp::source::Source::new(source.to_string()).download_url()
 }
 
 async fn download(url: &str) -> Result<bytes::Bytes, reqwest::Error> {
