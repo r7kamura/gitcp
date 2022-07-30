@@ -1,0 +1,11 @@
+name: test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    uses: r7kamura/workflows/.github/workflows/rust-test.yml@main
