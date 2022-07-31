@@ -1,5 +1,7 @@
 # gitcp
 
+[![test](https://github.com/r7kamura/gitcp/actions/workflows/test.yml/badge.svg)](https://github.com/r7kamura/gitcp/actions/workflows/test.yml)
+
 Copy files from Git repository to local.
 
 ## Usage
