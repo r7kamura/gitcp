@@ -1,0 +1,24 @@
+name: release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - uses: salsify/action-detect-and-tag-new-version@v2
+        id: tag-new-version
+        with:
+          version-command: ruby -e 'puts File.read("Cargo.toml")[/version = "(.+)"/, 1]'
+      - uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+          tag_name: ${{ steps.tag-new-version.outputs.tag }}
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        if: ${{ steps.tag-new-version.outputs.tag }}
