@@ -4,16 +4,13 @@ use structopt::StructOpt;
 #[tokio::main]
 async fn main() -> gitcp::result::Result<()> {
     let opt = gitcp::opt::Opt::from_args();
-
     let source = gitcp::source::Source::parse(opt.source)?;
     let bytes = download(source.download_url).await?;
-    let tempdir = create_temporary_directory()?;
-    unpack(bytes.as_ref(), tempdir.path())?;
-
-    let path_buf = tempdir.path().join(source.glob_pattern);
-    let source_glob_pattern = path_buf.to_str().unwrap();
-    move_items(source_glob_pattern, &opt.destination)?;
-
+    let tempdir = unpack(bytes.as_ref())?;
+    move_items(
+        tempdir.path().join(source.glob_pattern).to_str().unwrap(),
+        &opt.destination,
+    )?;
     Ok(())
 }
 
@@ -32,7 +29,10 @@ async fn download(url: impl Into<String>) -> gitcp::result::Result<bytes::Bytes>
     Ok(result)
 }
 
-fn move_items(source_glob_pattern: &str, destination: &str) -> gitcp::result::Result<()> {
+fn move_items(
+    source_glob_pattern: impl AsRef<str>,
+    destination: &str,
+) -> gitcp::result::Result<()> {
     let paths = list_moved_item_paths(source_glob_pattern);
     mkdir_p(destination)?;
     let mut copy_options = fs_extra::dir::CopyOptions::new();
@@ -50,14 +50,14 @@ fn mkdir_p(path: &str) -> std::io::Result<()> {
     Ok(())
 }
 
-fn list_item_paths(glob_pattern: &str) -> Vec<std::path::PathBuf> {
+fn list_item_paths(glob_pattern: impl AsRef<str>) -> Vec<std::path::PathBuf> {
     globwalk::glob(glob_pattern)
         .unwrap()
         .map(|path| path.unwrap().path().to_owned())
         .collect()
 }
 
-fn list_moved_item_paths(glob_pattern: &str) -> Vec<std::path::PathBuf> {
+fn list_moved_item_paths(glob_pattern: impl AsRef<str>) -> Vec<std::path::PathBuf> {
     let paths = list_item_paths(glob_pattern);
     if let Some(ignore_file) = gitcp::ignore_file::IgnoreFile::find(paths.clone().into_iter()) {
         let glob_set = ignore_file.to_glob_set();
@@ -71,12 +71,10 @@ fn list_moved_item_paths(glob_pattern: &str) -> Vec<std::path::PathBuf> {
     }
 }
 
-fn unpack(
-    readable: impl std::io::Read,
-    destination: &std::path::Path,
-) -> gitcp::result::Result<()> {
+fn unpack(readable: impl std::io::Read) -> gitcp::result::Result<tempfile::TempDir> {
     let gz_encoder = flate2::read::GzDecoder::new(readable);
     let mut archive = tar::Archive::new(gz_encoder);
-    archive.unpack(destination)?;
-    Ok(())
+    let tempdir = create_temporary_directory()?;
+    archive.unpack(tempdir.path())?;
+    Ok(tempdir)
 }
