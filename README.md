@@ -78,3 +78,5 @@ gitcp r7kamura/github-label-sync-action-template
 ```
 
 - https://github.com/r7kamura/github-label-sync-action-template
+
+If you always prepare routine files every time you create a repository, I think you can make it easier with `gitcp` by preparing that template.
