@@ -40,11 +40,25 @@ fn mkdir_p(path: &str) -> std::io::Result<()> {
     Ok(())
 }
 
-fn list_moved_item_paths(glob_pattern: &str) -> Vec<std::path::PathBuf> {
+fn list_item_paths(glob_pattern: &str) -> Vec<std::path::PathBuf> {
     globwalk::glob(glob_pattern)
         .unwrap()
         .map(|path| path.unwrap().path().to_owned())
         .collect()
+}
+
+fn list_moved_item_paths(glob_pattern: &str) -> Vec<std::path::PathBuf> {
+    let paths = list_item_paths(glob_pattern);
+    if let Some(ignore_file) = gitcp::ignore_file::IgnoreFile::find(paths.clone().into_iter()) {
+        let glob_set = ignore_file.to_glob_set();
+        paths
+            .iter()
+            .filter(|path| !glob_set.is_match(path))
+            .cloned()
+            .collect()
+    } else {
+        paths
+    }
 }
 
 fn unpack(
