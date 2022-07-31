@@ -69,7 +69,7 @@ README.md
 
 ## Background
 
-A s a tool creator, this can be useful when you want to provide users with some initial template files.
+As a tool creator, this can be useful when you want to provide users with some initial template files.
 
 For example, when providing a custom GitHub Action, it's more convenient to explain like this:
 
