@@ -61,38 +61,20 @@ gitcp owner/repo/{foo,bar}.*
 
 If there is `.gitcpignore` in the copied repository side, it will be used to ignore files.
 
-```
+```bash
 # .gitcpignore
 CHANGELOG.md
 README.md
 ```
 
-## Background
+## Example usecase
 
-As a tool creator, this can be useful when you want to provide users with some initial template files.
+This tool can be used not only to simply copy files from any repository, but also as an installer to provide templates for custom GitHub actions.
 
-For example, when providing a custom GitHub Action, it's more convenient to explain like this:
+This is an example to install [github-label-sync-action](https://github.com/r7kamura/github-label-sync-action) into the repository:
 
-> Please run the following command:
->
-> ```
-> gitcp owner/my-custom-action-template
-> ```
+```
+gitcp r7kamura/github-label-sync-action-template
+```
 
-than to explain like this:
-
-> Please create a workflow with the following content:
->
-> ```yaml
-> # .github/workflows/my-custom-action.yml
-> ...
-> ```
->
-> and then put config file like this:
->
-> ```yaml
-> # my-custom-action-settings.yml
-> ...
-> ```
-
-I had exactly that experience when I created [github-label-sync-action](https://github.com/r7kamura/github-label-sync-action), so I thought it would be nice to have such a tool, and that's I came to create this.
+- https://github.com/r7kamura/github-label-sync-action-template
