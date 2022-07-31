@@ -6,7 +6,7 @@ Copy files from Git repository to local.
 
 ```
 $ gitcp --help
-gitcp 0.1.0
+gitcp 0.2.0
 Copy files from Git repository to local.
 
 USAGE:
