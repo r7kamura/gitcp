@@ -67,7 +67,7 @@ CHANGELOG.md
 README.md
 ```
 
-## Example usecase
+## Usecases
 
 This tool can be used not only to simply copy files from any repository, but also as an installer to provide templates for custom GitHub actions.
 
