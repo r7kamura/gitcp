@@ -261,6 +261,7 @@ dependencies = [
  "bytes",
  "flate2",
  "fs_extra",
+ "globset",
  "globwalk",
  "reqwest",
  "structopt",
