@@ -1,5 +1,6 @@
 use crate::error::Error;
 
+#[derive(Debug)]
 pub struct Source {
     pub download_url: String,
     pub glob_pattern: String,
@@ -20,20 +21,12 @@ impl Source {
         })?;
         let file_path = parts.next();
 
-        let download_url = if let Some(reference) = reference {
-            format!(
-                "https://codeload.github.com/{owner}/{name}/legacy.tar.gz/refs/heads/{reference}",
-                name = name,
-                owner = owner,
-                reference = reference,
-            )
-        } else {
-            format!(
-                "https://api.github.com/repos/{owner}/{name}/tarball/",
-                name = name,
-                owner = owner
-            )
-        };
+        let download_url = format!(
+            "https://api.github.com/repos/{owner}/{name}/tarball/{reference}",
+            name = name,
+            owner = owner,
+            reference = reference.unwrap_or(""),
+        );
 
         let glob_pattern = format!("*/{}", file_path.unwrap_or("*"));
 
@@ -73,7 +66,7 @@ mod tests {
         let raw = "rust-lang/rust@main";
         let source = super::Source::parse(raw).unwrap();
         assert_eq!(
-            "https://codeload.github.com/rust-lang/rust/legacy.tar.gz/refs/heads/main",
+            "https://api.github.com/repos/rust-lang/rust/tarball/main",
             source.download_url
         );
         assert_eq!("*/*", source.glob_pattern);
@@ -84,7 +77,7 @@ mod tests {
         let raw = "rust-lang/rust/README.md@main";
         let source = super::Source::parse(raw).unwrap();
         assert_eq!(
-            "https://codeload.github.com/rust-lang/rust/legacy.tar.gz/refs/heads/main",
+            "https://api.github.com/repos/rust-lang/rust/tarball/main",
             source.download_url
         );
         assert_eq!("*/README.md", source.glob_pattern);
