@@ -47,6 +47,14 @@ gitcp owner/repo@v1
 gitcp owner/repo/foo.txt
 ```
 
+### Copy specific files
+
+You can specify [globwalk](https://github.com/Gilnaa/globwalk) powered glob patterns.
+
+```
+gitcp owner/repo/{foo,bar}.*
+```
+
 ## Configuration
 
 ### .gitcpignore
