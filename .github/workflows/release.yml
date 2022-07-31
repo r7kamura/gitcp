@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  run:
+  release:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
@@ -20,9 +20,12 @@ jobs:
         with:
           generate_release_notes: true
           tag_name: ${{ steps.tag-new-version.outputs.tag }}
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         if: ${{ steps.tag-new-version.outputs.tag }}
       - run: cargo publish
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         if: ${{ steps.tag-new-version.outputs.tag }}
+  build:
+    needs:
+      - release
+    uses: r7kamura/workflows/.github/workflows/rust-release-binaries.yml@main
