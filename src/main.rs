@@ -25,9 +25,19 @@ async fn download(url: &str) -> Result<bytes::Bytes, reqwest::Error> {
 
 fn move_items(source_glob_pattern: &str, destination: &str) -> Result<u64, fs_extra::error::Error> {
     let paths = list_moved_item_paths(source_glob_pattern);
+    mkdir_p(destination)?;
     let mut copy_options = fs_extra::dir::CopyOptions::new();
     copy_options.overwrite = true;
     fs_extra::move_items(&paths, destination, &copy_options)
+}
+
+fn mkdir_p(path: &str) -> std::io::Result<()> {
+    if let Err(e) = std::fs::create_dir_all(path) {
+        if e.kind() != std::io::ErrorKind::AlreadyExists {
+            return Err(e);
+        }
+    }
+    Ok(())
 }
 
 fn list_moved_item_paths(glob_pattern: &str) -> Vec<std::path::PathBuf> {
