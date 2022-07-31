@@ -15,7 +15,7 @@ e.g.
 - debian package
 - etc.
 
-For now, manually install from GitHub Releases page:
+For now, manually install prebuilt binary from GitHub Releases page:
 
 - https://github.com/r7kamura/gitcp/releases
 
