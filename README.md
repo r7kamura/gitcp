@@ -29,7 +29,7 @@ cargo install gitcp
 
 ```
 $ gitcp --help
-gitcp 0.3.0
+gitcp 0.3.1
 Copy files from Git repository to local.
 
 USAGE:

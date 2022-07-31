@@ -1,6 +1,6 @@
 [package]
 name = "gitcp"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 description = "Copy files from Git repository to local."
 homepage = "https://github.com/r7kamura/gitcp"
