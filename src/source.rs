@@ -1,86 +1,92 @@
+use crate::error::Error;
+
 pub struct Source {
-    pub raw: String,
+    pub download_url: String,
+    pub glob_pattern: String,
 }
 
 impl Source {
-    pub fn new(raw: String) -> Self {
-        Self { raw }
-    }
+    pub fn parse(raw: impl Into<String>) -> crate::result::Result<Self> {
+        let raw = raw.into();
+        let mut sections = raw.split('@');
+        let body = sections.next().unwrap();
+        let reference = sections.next();
 
-    pub fn download_url(&self) -> Option<String> {
-        if self.reference().is_none() {
-            Some(format!(
-                "https://api.github.com/repos/{repository_identifier}/tarball/",
-                repository_identifier = self.repository_identifier()?
-            ))
+        let mut parts = body.splitn(3, '/');
+
+        let owner = parts.next().unwrap();
+        let name = parts.next().ok_or(Error::InvalidSourceError {
+            source: owner.to_string(),
+        })?;
+        let file_path = parts.next();
+
+        let download_url = if let Some(reference) = reference {
+            format!(
+                "https://codeload.github.com/{owner}/{name}/legacy.tar.gz/refs/heads/{reference}",
+                name = name,
+                owner = owner,
+                reference = reference,
+            )
         } else {
-            Some(format!(
-                "https://codeload.github.com/{repository_identifier}/legacy.tar.gz/refs/heads/{reference}",
-                repository_identifier = self.repository_identifier()?,
-                reference = self.reference()?
-            ))
-        }
-    }
+            format!(
+                "https://api.github.com/repos/{owner}/{name}/tarball/",
+                name = name,
+                owner = owner
+            )
+        };
 
-    pub fn glob_pattern(&self) -> String {
-        format!("*/{}", self.file_path().unwrap_or_else(|| "*".to_string()))
-    }
+        let glob_pattern = format!("*/{}", file_path.unwrap_or("*"));
 
-    fn reference(&self) -> Option<String> {
-        self.raw.split_once('@').map(|x| x.1.to_string())
-    }
-
-    fn repository_identifier(&self) -> Option<String> {
-        let mut segments = self.raw.split('@').next()?.splitn(3, '/');
-        let owner = segments.next()?;
-        let name = segments.next()?;
-        Some(format!("{owner}/{name}", owner = owner, name = name))
-    }
-
-    fn file_path(&self) -> Option<String> {
-        self.raw
-            .split('@')
-            .next()?
-            .splitn(3, '/')
-            .nth(2)
-            .map(|x| x.to_string())
+        Ok(Source {
+            download_url,
+            glob_pattern,
+        })
     }
 }
 
 #[cfg(test)]
 mod tests {
     #[test]
-    fn test_download_url_without_reference() {
-        let source = "rust-lang/rust";
-        let url = super::Source::new(source.to_string())
-            .download_url()
-            .unwrap();
-        assert_eq!("https://api.github.com/repos/rust-lang/rust/tarball/", url);
-    }
-
-    #[test]
-    fn test_download_url_with_reference() {
-        let source = "rust-lang/rust@master";
-        let url = super::Source::new(source.to_string())
-            .download_url()
-            .unwrap();
+    fn test_parse() {
+        let raw = "rust-lang/rust";
+        let source = super::Source::parse(raw).unwrap();
         assert_eq!(
-            "https://codeload.github.com/rust-lang/rust/legacy.tar.gz/refs/heads/master",
-            url
+            "https://api.github.com/repos/rust-lang/rust/tarball/",
+            source.download_url
         );
+        assert_eq!("*/*", source.glob_pattern);
     }
 
     #[test]
-    fn test_glob_pattern_on_none_case() {
-        let source = "rust-lang/rust";
-        let glob_pattern = super::Source::new(source.to_string()).glob_pattern();
-        assert_eq!("*/*", glob_pattern);
+    fn test_parse_with_file_path() {
+        let raw = "rust-lang/rust/README.md";
+        let source = super::Source::parse(raw).unwrap();
+        assert_eq!(
+            "https://api.github.com/repos/rust-lang/rust/tarball/",
+            source.download_url
+        );
+        assert_eq!("*/README.md", source.glob_pattern);
     }
 
     #[test]
-    fn test_glob_pattern_on_some_case() {
-        let source = "rust-lang/rust/foo/bar";
-        let glob_pattern = super::Source::new(source.to_string()).glob_pattern();
-        assert_eq!("*/foo/bar", glob_pattern);
+    fn test_parse_with_reference() {
+        let raw = "rust-lang/rust@main";
+        let source = super::Source::parse(raw).unwrap();
+        assert_eq!(
+            "https://codeload.github.com/rust-lang/rust/legacy.tar.gz/refs/heads/main",
+            source.download_url
+        );
+        assert_eq!("*/*", source.glob_pattern);
+    }
+
+    #[test]
+    fn test_parse_with_file_path_and_reference() {
+        let raw = "rust-lang/rust/README.md@main";
+        let source = super::Source::parse(raw).unwrap();
+        assert_eq!(
+            "https://codeload.github.com/rust-lang/rust/legacy.tar.gz/refs/heads/main",
+            source.download_url
+        );
+        assert_eq!("*/README.md", source.glob_pattern);
     }
 }
