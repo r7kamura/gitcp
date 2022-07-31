@@ -4,6 +4,27 @@
 
 Copy files from Git repository to local.
 
+## Install
+
+We are planning to add some installers support in the future.
+
+e.g.
+
+- homebrew
+- winget
+- debian package
+- etc.
+
+For now, manually install from GitHub Releases page:
+
+- https://github.com/r7kamura/gitcp/releases
+
+or install from source via:
+
+```
+cargo install gitcp
+```
+
 ## Usage
 
 ```
